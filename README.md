@@ -1,77 +1,125 @@
-# A Markdown Editor
+# A React组件之间的通信
+  React在数据流向性上的一大特点就是他的单向性，这个特点使得组件之间的通信会有一些麻烦。这里主要分三种情况，从最基本的父子之间进行通信（即父组件传递数值到子组件，和子组件传递到父组件），到拥有同一父节点的兄弟组件之间的通信，以及没有任何层级关系的两个组件互相之间的通信。
 
-WYSIWYG
+###父子组件之间的通信
 
-更新:[ringring](https://github.com/tulayang/ringring)模块现在重写了amarkdown编辑器的核心事件处理,如果需要编写自定义的markdown编辑器,可以使用[ringring](https://github.com/tulayang/ringring).
-
-###依赖模块
-
- * [CodeMirror](https://github.com/tulayang/CodeMirror) 编辑代码高亮
- * [marked](https://github.com/chjj/marked)  html解析器
- * [highlight](https://github.com/isagalaev/highlight.js)  html代码高亮
- * [hogan](https://github.com/twitter/hogan.js) 前端模板引擎
-
-###如何使用
-
-在`index.html`中很好的标明了需要引入的css、js文件，以及如何调用AMD.make()构造器。
-
-
-**导入css文件**
+ 父组件更新子组件状态的过程很简单，在每一个开发过程中都经常使用，即通过props来进行数值的传递。父组件更新状态，那么通过props会将数值传递给子组件，重新渲染数据。
+ 如果不止有父子两层，而是有更多层嵌套，那么也将通过props向下传递。这种通过顶点的props改变，重新渲染子节点的方式，是严格意义上react唯一提供的交流方式。
+ 由于props的传递是单向的，子组件不能通过同样的方式去改变父组件。而事实上，react也没有提供专门的事件供子组件去通知父组件。那么怎样才能让子组件去通知父组件呢，同样要利用父组件到子组件的props传递，这次是父组件传递一个回调函数给子组件，子组件调用这个触发即可。
+ 
+ 具体的代码示例如下：
 
 ```js
-<link type="text/css" rel="stylesheet" href="css/font-awesome/css/font-awesome.css"/>
-<link type="text/css" rel="stylesheet" href="css/codemirror.css"/>
-<link type="text/css" rel="stylesheet" href="css/highlight/xcode.css"/>
-<link type="text/css" rel="stylesheet" href="css/amd.css"/>
-<link type="text/css" rel="stylesheet" href="css/markdown.css"/>
+class Son extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {}
+  }
+    render(){
+    return (
+      <div>
+        {this.props.value}
+        <button onClick={this.props.changeFather}>
+            改变父组件状态
+        </button>
+      </div>
+    )
+  }
+}
+class Father extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {}
+  }
+  changeSon(){
+    return (e)=>{
+      this.setState({
+        sonValue: "父组件已通知子组件",
+      })
+    }
+  }
+  changeFather(){
+    this.setState({
+      fatherValue: "子组件已通知父组件",
+    })
+  }
+  render(){
+    return (
+      <div>
+        <button onClick={this.changeSon()} >
+            改变子组件状态
+        </button>
+        <Son 
+          value={this.state.sonValue || "未改变子组件状态"} 
+          changeFather={this. changeFather.bind(this)}
+        />
+        {this.state. fatherValue || "未改变父组件状态"}
+      </div>
+    )
+  }
+}
+
 ```
 
-**导入js文件**
+### 兄弟组件之间的通信
+ 当同一个父组件有两个或多个子组件时，这些子组件之间可以进行间接通信，即通过上面的方法，以父组件为媒介，通过父组件的回调函数来互相改变状态。
+ 
+ ```js
+class  Older extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {}
+  }
+render(){
+    return (
+      <div>
+        <button onClick={this.props.changeBrother}>
+            更新兄弟组件
+        </button>
+      </div>
+    )
+  }
+}
+class Younger extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {}
+  }
+render(){
+    return (
+      <div>
+         {this.props.value || "未改变状态"
+      </div>
+    )
+  }
+}
+class Father extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {}
+  }
+  changeBrother(){
+    return (e)=>{
+      this.setState({
+        value: "兄弟组件已通信",
+      })
+    }
+  } 
+  render(){
+    return (
+      <div>
+        <Older changeBrother ={this. changeBrother ()}/>
+        <Younger value={this.state.value}/>
+      </div>
+    )
+  }
+}
 
-```js
-<script src="js/codemirror/lib/codemirror.js"></script>
-<script src="js/codemirror/mode/markdown/markdown.js"></script>
-<script src="js/amd.js"></script>
-<script src="js/amd.hogan.js"></script>
-<script src="js/amd.template.js"></script>
-<script src="js/amd.marked.js"></script>
-<script src="js/amd.highlight.js"></script>
-<script src="js/amd.make.js"></script>
 ```
+### 无层级关系的组件通信
+ 在嵌套关系复杂时，用上述方法实现两个距离较远的组件间的通信，需要繁琐的组件亲戚调用。这时候可以使用全局事件。全局事件的原理是，改变数据的组件发起一个事件，使用数据的组件监听这个事件，在事件处理函数中触发setState来改变视图或者做其他的操作。这种事件模型有第三方的类库，EventEmitter或PostalJS。然而这样做也打破了单项数据流的机制，可能会导致数据流不可控。所以并不建议使用。
+ 为了在更加清晰和方便地在react中管理数据， Flux架构被提出，后面又有redux对其进行改进和优化。Redux有着统一的对组件state的管理，从而达到数据可控的目的。
 
-**调用构造器**
-
-```js
-AMD.make('#amd-editor', {
-    amdBack: '/',
-    amdPubMethod: 'post',
-    amdPubAction: '/',
-    amdSaveAction: '/',
-    amdUploadImgAction: '/image',
-    amdInitText: '',
-    amdInitTitle: '',
-    titleName: 'title',
-    textName: 'text'
-});
-```
-
-**服务器添加图片存储路由, 类似这样的程序**
-
-```js
-// 收到图片上传请求
-// 保存图片
-// 返回保存后图片的路径
-```
-
-###AMD.make构造器参数
-
- * amdUploadImgAction  上传图片的服务器路径
- * amdPubAction  发布按钮点击，文章内容提交的服务器路径
- * titleName  发布标题name值
- * textName  发布内容name值
-
-到目前为止，**a markdown editor**的收尾做的有些仓促。未来还打算增加**mini版本的css**，编辑和预览放入一个控件位置以及增加前端图片格式预判断等。 
-还未制作的完毕的部分：上传图片URL直接输入，未来更新。
-
-*[see DEMO]// 已下线*
+### 总结
+ 父子组件的通信，兄弟组件的通信这种层级关系较为简单的通信，我们可以采用简单地传递props或者回调函数的方式，但是当项目中组件较多，层级关系复杂，有些时候这些简单地方式就不方便了。强烈建议使用Flux、Relay、Redux、trandux等类库其中一种。
 

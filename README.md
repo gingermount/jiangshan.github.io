@@ -74,7 +74,7 @@ class Father extends React.Component{
   changeBrother(){
     return (e)=>{
       this.setState({
-        value: "兄弟组件已通信",
+        value: "已通信",
       })
     }
   } 
@@ -96,7 +96,7 @@ render(){
     return (
       <div>
         <button onClick={this.props.changeBrother}>
-            更新兄弟组件
+            改变状态
         </button>
       </div>
     )

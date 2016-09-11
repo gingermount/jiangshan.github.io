@@ -10,22 +10,6 @@
  具体的代码示例如下：
 
 ```js
-class Son extends React.Component{
-  constructor(props){
-    super(props);
-    this.state = {}
-  }
-    render(){
-    return (
-      <div>
-        {this.props.value}
-        <button onClick={this.props.changeFather}>
-            改变父组件状态
-        </button>
-      </div>
-    )
-  }
-}
 class Father extends React.Component{
   constructor(props){
     super(props);
@@ -58,6 +42,23 @@ class Father extends React.Component{
     )
   }
 }
+class Son extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {}
+  }
+    render(){
+    return (
+      <div>
+        {this.props.value}
+        <button onClick={this.props.changeFather}>
+            改变父组件状态
+        </button>
+      </div>
+    )
+  }
+}
+
 
 ```
 
@@ -65,6 +66,27 @@ class Father extends React.Component{
  当同一个父组件有两个或多个子组件时，这些子组件之间可以进行间接通信，即通过上面的方法，以父组件为媒介，通过父组件的回调函数来互相改变状态。
  
  ```js
+class Father extends React.Component{
+  constructor(props){
+    super(props);
+    this.state = {}
+  }
+  changeBrother(){
+    return (e)=>{
+      this.setState({
+        value: "兄弟组件已通信",
+      })
+    }
+  } 
+  render(){
+    return (
+      <div>
+        <Older changeBrother ={this. changeBrother ()}/>
+        <Younger value={this.state.value}/>
+      </div>
+    )
+  }
+} 
 class  Older extends React.Component{
   constructor(props){
     super(props);
@@ -93,27 +115,7 @@ render(){
     )
   }
 }
-class Father extends React.Component{
-  constructor(props){
-    super(props);
-    this.state = {}
-  }
-  changeBrother(){
-    return (e)=>{
-      this.setState({
-        value: "兄弟组件已通信",
-      })
-    }
-  } 
-  render(){
-    return (
-      <div>
-        <Older changeBrother ={this. changeBrother ()}/>
-        <Younger value={this.state.value}/>
-      </div>
-    )
-  }
-}
+
 
 ```
 ### 无层级关系的组件通信

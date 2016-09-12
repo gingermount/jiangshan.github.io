@@ -18,26 +18,26 @@ class Father extends React.Component{
   changeSon(){
     return (e)=>{
       this.setState({
-        sonValue: "父组件已通知子组件",
+        sonValue: "子组件状态值改为1",
       })
     }
   }
   changeFather(){
     this.setState({
-      fatherValue: "子组件已通知父组件",
+      fatherValue: "父组件状态值改为1",
     })
   }
   render(){
     return (
       <div>
         <button onClick={this.changeSon()} >
-            改变子组件状态
+            改变子组件状态值至1
         </button>
         <Son 
-          value={this.state.sonValue || "未改变子组件状态"} 
+          value={this.state.sonValue || "子组件初始状态值为0"} 
           changeFather={this. changeFather.bind(this)}
         />
-        {this.state. fatherValue || "未改变父组件状态"}
+        {this.state. fatherValue || "父组件初始状态值为0"}
       </div>
     )
   }
@@ -52,7 +52,7 @@ class Son extends React.Component{
       <div>
         {this.props.value}
         <button onClick={this.props.changeFather}>
-            改变父组件状态
+            改变父组件状态值至1
         </button>
       </div>
     )
@@ -110,7 +110,7 @@ class Younger extends React.Component{
 render(){
     return (
       <div>
-         {this.props.value || "未改变状态"
+         {this.props.value || "未通信"
       </div>
     )
   }
@@ -122,6 +122,6 @@ render(){
  在嵌套关系复杂时，用上述方法实现两个距离较远的组件间的通信，需要繁琐的组件亲戚调用。这时候可以使用全局事件。全局事件的原理是，改变数据的组件发起一个事件，使用数据的组件监听这个事件，在事件处理函数中触发setState来改变视图或者做其他的操作。这种事件模型有第三方的类库，EventEmitter或PostalJS。然而这样做也打破了单项数据流的机制，可能会导致数据流不可控。所以并不建议使用。
  为了在更加清晰和方便地在react中管理数据， Flux架构被提出，后面又有redux对其进行改进和优化。Redux有着统一的对组件state的管理，从而达到数据可控的目的。
 
-### 总结
- 父子组件的通信，兄弟组件的通信这种层级关系较为简单的通信，我们可以采用简单地传递props或者回调函数的方式，但是当项目中组件较多，层级关系复杂，有些时候这些简单地方式就不方便了。强烈建议使用Flux、Relay、Redux、trandux等类库其中一种。
+### 结语
+ 父子组件的通信，兄弟组件的通信这种层级关系较为简单的通信，我们可以采用简单地传递props或者回调函数的方式，但是当项目中组件较多，层级关系复杂，有些时候这些简单地方式就不方便了。还是建议使用能够Flux、Relay、Redux、trandux等类库。
 

@@ -18,13 +18,13 @@ class Father extends React.Component{
   changeSon(){
     return (e)=>{
       this.setState({
-        sonValue: "子组件状态值改为1",
+        sonValue: "子组件：1",
       })
     }
   }
   changeFather(){
     this.setState({
-      fatherValue: "父组件状态值改为1",
+      fatherValue: "父组件：1",
     })
   }
   render(){
@@ -34,10 +34,10 @@ class Father extends React.Component{
             改变子组件状态值至1
         </button>
         <Son 
-          value={this.state.sonValue || "子组件初始状态值为0"} 
+          value={this.state.sonValue || "子组件：0"} 
           changeFather={this. changeFather.bind(this)}
         />
-        {this.state. fatherValue || "父组件初始状态值为0"}
+        {this.state. fatherValue || "父组件：0"}
       </div>
     )
   }
